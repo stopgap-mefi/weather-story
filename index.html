@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wx Story</title>
+
+    <meta name="viewport" content="width=320,initial-scale=1,user-scalable=yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+
+<link rel="shortcut icon" href="favicon.png" />
+<link rel="apple-touch-icon" href="favicon.png" />
+
+<style type="text/css">
+
+body {
+  margin: 0px;
+  padding: 0px;
+  }
+
+
+a img { 
+  border: 0;
+  }
+
+iframe {
+  word-wrap: normal;
+  white-space: normal;
+  font-family: helvetica, arial, sans-serif;
+  margin: 0px;
+  }
+
+#content {
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  }
+
+</style>
+
+
+  <script type="text/javascript">
+
+function gup( name )
+{
+  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+  var regexS = "[\\?&]"+name+"=([^&#]*)";
+  var regex = new RegExp( regexS );
+  var results = regex.exec( window.location.href );
+  if( results == null )
+    return "";
+  else
+    return results[1];
+}
+
+function locationcheck ( code ) {
+
+   code = code !== "" ? code : "lot";
+   upperCode = code.toUpperCase();
+
+
+   url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/";
+   wximg_url = url + "File.png";
+   wxdesc_url = url + "description.txt";
+   link_url = "http://www.crh.noaa.gov/wxstory.php?site=" + code;
+   radar_url = "http://radar.weather.gov/ridge/radar_lite.php?rid=" + code + "&product=N0R&loop=yes";
+   radarimg_url = "http://radar.weather.gov/ridge/lite/N0R/" + upperCode + "_loop.gif"; 
+
+}
+
+locationcheck( gup('site') );
+
+
+  </script>
+
+
+</head>
+
+    <body>
+<div id="content">
+<script type="text/javascript">
+
+document.writeln('<a href="' + link_url + '"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="320" height="255"></a>');
+document.writeln('<br />');
+document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="326"></iframe>');
+document.writeln('<br />');
+document.writeln('<a href="' + radar_url + '"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="320" height="293"></a>');
+
+
+</script>
+</div>
+    </body>
+</html>
