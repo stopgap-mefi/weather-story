@@ -3,7 +3,7 @@ weather-story
 
 # NOAA Weather Story for iPhone
 
-The National Weather Service forecast offices within the Central Region Headquarters produce a weather product called the Weather Story, which is a single-image forecast summary and brief text forecast, varying in style from office to office. For example, here is the [Weather Story for the Chicago office](http://www.crh.noaa.gov/wxstory.php?site=lot).
+The National Weather Service forecast offices within the Central Region Headquarters produce a weather product called the Weather Story, which is a single-image forecast summary and bried text forecast, varying in style from office to office. For example, here is the [Weather Story for the Chicago office](http://www.crh.noaa.gov/wxstory.php?site=lot).
 
 This project combines that weather story with local radar information, formatted to fit an iPhone display. A favicon is included so you can add this forecast to your home screen.
 
