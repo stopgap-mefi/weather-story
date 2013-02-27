@@ -153,18 +153,20 @@ nowcast_img = new Image();
 wx_img_height = ( width / 652 ) * 540;
 nowcast_img_height = ( width / 783 ) * 558;
 nowcast_heights = [wx_img_height, nowcast_img_height];
-
+nowcast_vspace = [nowcast_img_height - wx_img_height, 0];
 
 // Set the image heights to the proper ratio as each image loads
 wx_img.onload = function () {
     wx_img_height = ( width / this.width ) * this.height;
     nowcast_heights = [wx_img_height, nowcast_img_height];
+	nowcast_vspace = [nowcast_img_height - wx_img_height, 0];
 	wx_img = wx_img.onload = wx_img.onabort = wx_img.onerror = null;
 	document.getElementById("wximg").height = wx_img_height;
     };
 nowcast_img.onload = function () {
     nowcast_img_height = ( width / this.width ) * this.height;
     nowcast_heights = [wx_img_height, nowcast_img_height];
+	nowcast_vspace = [nowcast_img_height - wx_img_height, 0];
 	nowcast_img = nowcast_img.onload = nowcast_img.onabort = nowcast_img.onerror = null;
     };
 
@@ -176,10 +178,12 @@ nowcast_toggled = 0;
 
 
 function toggle_nowcast () {
-
+  wximg = document.getElementById("wximg");
   nowcast_toggled = (nowcast_toggled + 1) % 2;
-  document.getElementById("wximg").src = nowcast_images[nowcast_toggled];
-  document.getElementById("wximg").height = nowcast_heights[nowcast_toggled];
+  
+  wximg.src = nowcast_images[nowcast_toggled];
+  wximg.height = nowcast_heights[nowcast_toggled];
+  wximg.style.marginTop = Math.round(nowcast_vspace[nowcast_toggled]) + 'px';
 
   // if (nowcast_toggled == 0) {
   //	document.getElementById("nowcast").style.display = "none";
