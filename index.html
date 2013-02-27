@@ -33,7 +33,7 @@ iframe {
   word-wrap: normal;
   white-space: normal;
   font-family: helvetica, arial, sans-serif;
-  margin: 0px auto 0px auto;
+  margin: 0px auto 0px -4px;
   }
 
 #content {
@@ -339,8 +339,8 @@ function toggle_radar () {
 
 document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="' + width + '" height="' + wx_img_height + '"></a>');
 document.writeln('<br />');
-document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="' + ( width + 6 ) + '" seamless></iframe>');
-document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="' + ( width + 6 ) + '" seamless></iframe>');
+document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
+document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
 document.writeln('<br />');
 document.writeln('<a href="javascript:toggle_radar();"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="' + width + '" height="' + localradar_img_height + '"></a>');
 
