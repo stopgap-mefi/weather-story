@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Wx Story</title>
 
-    <meta name="viewport" content="width=320,initial-scale=1,user-scalable=yes" />
+    <meta name="viewport" content="width=280,initial-scale=1.142857,user-scalable=yes,minimum-scale=1.142857,maximum-scale=6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 	<meta name="format-detection" content="telephone=no">
@@ -33,7 +34,7 @@ iframe {
   word-wrap: normal;
   white-space: normal;
   font-family: helvetica, arial, sans-serif;
-  margin: 0px;
+  margin: 0px auto 0px auto;
   }
 
 #content {
@@ -44,8 +45,12 @@ iframe {
 
 #nowcast {
   display: none;
-  margin-bottom: 1em;
+  border-top: 6px solid red;
   }  
+
+pre {
+  font-family: helvetica, arial, sans-serif;
+  }
   
 </style>
 
@@ -66,9 +71,41 @@ function gup( name )
 
 function locationcheck ( code ) {
 
-   code = code !== "" ? code : "lot";
-   upperCode = code.toUpperCase();
+   stations = [ "RIW", "CYS",                // Wyoming
+                "GJT", "BOU", "PUB",         // Colorado
+                "BIS", "FGF",                // North Dakota
+                "UNR", "ABR", "FSD",         // South Dakota
+                "LBF", "GID", "OAX",         // Nebraska
+                "GLD", "DDC", "TOP", "ICT",  // Kansas
+                "DLH", "MPX",                // Minnesota
+                "DMX", "DVN",                // Iowa
+                "EAX", "SGF", "LSX",         // Missouri
+                "ARX", "GRB", "MKX",         // Wisconsin
+                "LOT", "ILX",                // Illinois
+                "MQT", "APX", "GRR", "DTX",  // Michigan
+                "IWX", "IND",                // Indiana
+                "PAH", "LMK", "JKL"          // Kentucky
+              ]; 
 
+   radar_stations = [ "RIW", "CYS",          // Wyoming
+                "GJX", "FTG", "PUX",         // Colorado
+                "BIS", "MVX",                // North Dakota
+                "UDX", "ABR", "FSD",         // South Dakota
+                "LNX", "UEX", "OAX",         // Nebraska
+                "GLD", "DDC", "TWX", "ICT",  // Kansas
+                "DLH", "MPX",                // Minnesota
+                "DMX", "DVN",                // Iowa
+                "EAX", "SGF", "LSX",         // Missouri
+                "ARX", "GRB", "MKX",         // Wisconsin
+                "LOT", "ILX",                // Illinois
+                "MQT", "APX", "GRR", "DTX",  // Michigan
+                "IWX", "IND",                // Indiana
+                "PAH", "LVX", "JKL"          // Kentucky
+              ]; 
+
+
+   code = ( stations.indexOf ( code.toUpperCase() ) != -1 ) ? code.toLowerCase() : "lot"; // default station is Chicago
+   radar_code = radar_stations[ stations.indexOf (code.toUpperCase()) ];
 
    url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/";
    wximg_url = url + "File.png";
@@ -78,30 +115,126 @@ function locationcheck ( code ) {
 
    link_url = "http://www.crh.noaa.gov/wxstory.php?site=" + code;
    radar_url = "http://radar.weather.gov/ridge/radar_lite.php?rid=" + code + "&product=N0R&loop=yes";
-   radarimg_url = "http://radar.weather.gov/ridge/lite/N0R/" + upperCode + "_loop.gif"; 
+   nowcast_link_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/nowcast_link";
+   radarimg_url = "http://radar.weather.gov/ridge/lite/N0R/" + radar_code + "_loop.gif"; 
+
+   value = stations.indexOf ( code.toUpperCase() );
+   switch (true) {
+
+     case ( value < 5 ):
+       region = "northrockies";
+       break;  
+     case ( value < 25 ):
+       region = "uppermissvly";
+       break;
+     default:
+       region = "centgrtlakes";
+       break;  
+
+   }
+
+   regional_url = "http://radar.weather.gov/ridge/Conus/Loop/" + region + "_loop.gif";
 
 }
 
 locationcheck( gup('site') );
 
+width = 280;
+
+
+// NOWCAST LOGIC
 nowcast_images = [wximg_url, nowcastimg_url];
-nowcast_heights = [255, 255];
+
+// Preload the Weather Story image and Nowcast image
+wx_img = new Image();
+nowcast_img = new Image();
+
+// Default image heights
+wx_img_height = ( width / 652 ) * 540;
+nowcast_img_height = ( width / 783 ) * 558;
+nowcast_heights = [wx_img_height, nowcast_img_height];
+
+
+// Set the image heights to the proper ratio as each image loads
+wx_img.onload = function () {
+    wx_img_height = ( width / this.width ) * this.height;
+    nowcast_heights = [wx_img_height, nowcast_img_height];
+	wx_img = wx_img.onload = wx_img.onabort = wx_img.onerror = null;
+	document.getElementById("wximg").height = wx_img_height;
+    };
+nowcast_img.onload = function () {
+    nowcast_img_height = ( width / this.width ) * this.height;
+    nowcast_heights = [wx_img_height, nowcast_img_height];
+	nowcast_img = nowcast_img.onload = nowcast_img.onabort = nowcast_img.onerror = null;
+    };
+
+wx_img.src = wximg_url;
+nowcast_img.src = nowcastimg_url;
+
+
 nowcast_toggled = 0;
+
 
 function toggle_nowcast () {
 
   nowcast_toggled = (nowcast_toggled + 1) % 2;
   document.getElementById("wximg").src = nowcast_images[nowcast_toggled];
-  // document.getElementById("wximg").height = nowcast_heights[nowcast_toggled];
+  document.getElementById("wximg").height = nowcast_heights[nowcast_toggled];
 
-  if (nowcast_toggled == 0) {
-	document.getElementById("nowcast").style.display = "none";
-	}
-  else {
-	document.getElementById("nowcast").style.display = "block";
-  }
+  // if (nowcast_toggled == 0) {
+  //	document.getElementById("nowcast").style.display = "none";
+  //	}
+  //  else {
+  //	document.getElementById("nowcast").style.display = "block";
+  // }
 	
 }
+
+function activate_nowcast() {
+	document.getElementById("nowcast").style.display = "block";
+}
+
+// RADAR LOGIC
+radar_images = [radarimg_url, regional_url];
+
+// Preload the Local and Regional radar images
+localradar_img = new Image();
+regionalradar_img = new Image();
+
+// Default image heights
+localradar_img_height = ( width / 600 ) * 550;
+regionalradar_img_height = ( width / 600 ) * 571;
+radar_heights = [localradar_img_height, regionalradar_img_height];
+
+
+// Set the image heights to the proper ratio as each image loads
+localradar_img.onload = function () {
+    localradar_img_height = ( width / this.width ) * this.height;
+    radar_heights = [localradar_img_height, regionalradar_img_height];
+	localradar_img = localradar_img.onload = localradar_img.onabort = localradar_img.onerror = null;
+	document.getElementById("radarimg").height = localradar_img_height;
+    };
+regionalradar_img.onload = function () {
+    regionalradar_img_height = ( width / this.width ) * this.height;
+    radar_heights = [localradar_img_height, regionalradar_img_height];
+	regionalradar_img = regionalradar_img.onload = regionalradar_img.onabort = regionalradar_img.onerror = null;
+    };
+
+localradar_img.src = radarimg_url;
+regionalradar_img.src = regional_url;
+
+
+
+radar_toggled = 0;
+
+function toggle_radar () {
+
+  radar_toggled = (radar_toggled + 1) % 2;
+  document.getElementById("radarimg").src = radar_images[radar_toggled];
+  document.getElementById("radarimg").height = radar_heights[radar_toggled];
+  
+}
+
 
   </script>
 
@@ -112,15 +245,24 @@ function toggle_nowcast () {
 <div id="content">
 <script type="text/javascript">
 
-document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="320" xheight="255" style="background-image: url(' + nowcastimg_url + ');"></a>');
+document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="' + width + '" height="' + wx_img_height + '"></a>');
 document.writeln('<br />');
-document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="326" seamless></iframe>');
-document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="326" seamless></iframe>');
+document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="' + ( width + 6 ) + '" seamless></iframe>');
+document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="' + ( width + 6 ) + '" seamless></iframe>');
 document.writeln('<br />');
-document.writeln('<a href="' + radar_url + '"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="320" height="293"></a>');
+document.writeln('<a href="javascript:toggle_radar();"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="' + width + '" height="' + localradar_img_height + '"></a>');
 
+window.onerror = function(message, url, lineNumber) {
+  activate_nowcast(); 
+  return true; // prevents browser error messages
+};
+
+nowcastScript = document.createElement("script");
+nowcastScript.src = nowcast_link_url;
+document.getElementById("content").appendChild(nowcastScript);
 
 </script>
+
 </div>
     </body>
 </html>
