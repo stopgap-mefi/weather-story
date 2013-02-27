@@ -42,6 +42,11 @@ iframe {
   text-align: center;
   }
 
+#nowcast {
+  display: none;
+  margin-bottom: 1em;
+  }  
+  
 </style>
 
 
@@ -68,6 +73,9 @@ function locationcheck ( code ) {
    url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/";
    wximg_url = url + "File.png";
    wxdesc_url = url + "description.txt";
+   nowcast_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/short/description.txt";
+   nowcastimg_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/short/File.png";
+
    link_url = "http://www.crh.noaa.gov/wxstory.php?site=" + code;
    radar_url = "http://radar.weather.gov/ridge/radar_lite.php?rid=" + code + "&product=N0R&loop=yes";
    radarimg_url = "http://radar.weather.gov/ridge/lite/N0R/" + upperCode + "_loop.gif"; 
@@ -76,6 +84,24 @@ function locationcheck ( code ) {
 
 locationcheck( gup('site') );
 
+nowcast_images = [wximg_url, nowcastimg_url];
+nowcast_heights = [255, 255];
+nowcast_toggled = 0;
+
+function toggle_nowcast () {
+
+  nowcast_toggled = (nowcast_toggled + 1) % 2;
+  document.getElementById("wximg").src = nowcast_images[nowcast_toggled];
+  // document.getElementById("wximg").height = nowcast_heights[nowcast_toggled];
+
+  if (nowcast_toggled == 0) {
+	document.getElementById("nowcast").style.display = "none";
+	}
+  else {
+	document.getElementById("nowcast").style.display = "block";
+  }
+	
+}
 
   </script>
 
@@ -86,9 +112,10 @@ locationcheck( gup('site') );
 <div id="content">
 <script type="text/javascript">
 
-document.writeln('<a href="' + link_url + '"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="320" height="255"></a>');
+document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="320" xheight="255" style="background-image: url(' + nowcastimg_url + ');"></a>');
 document.writeln('<br />');
-document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="326"></iframe>');
+document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="326" seamless></iframe>');
+document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="326" seamless></iframe>');
 document.writeln('<br />');
 document.writeln('<a href="' + radar_url + '"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="320" height="293"></a>');
 
