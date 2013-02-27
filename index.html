@@ -25,7 +25,6 @@ body {
   padding: 0px;
   }
 
-
 a img { 
   border: 0;
   }
@@ -41,13 +40,45 @@ iframe {
   width: 100%;
   overflow: hidden;
   text-align: center;
+  background: white;
   }
 
 #nowcast {
   display: none;
-  border-top: 6px solid red;
   }  
 
+#nowcast_banner {
+  background: black;
+  display: none;
+  }
+
+.inner_banner {
+  color: white;
+  font-family: helvetica, arial, sans-serif;
+  font-weight: bold;
+  font-size: 7px;
+  height: 10px;
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  }
+
+#nowcast_inner {
+  background: #aa0000;
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+  }
+
+#radar_banner {
+  background: black;
+  }
+  
+#radar_inner {
+  background: #0000aa;
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+  }
+  
 pre {
   font-family: helvetica, arial, sans-serif;
   }
@@ -57,6 +88,7 @@ pre {
 
   <script type="text/javascript">
 
+// Get URL Parameters function, used to get the weather station code
 function gup( name )
 {
   name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
@@ -69,6 +101,7 @@ function gup( name )
     return results[1];
 }
 
+// function to set the proper URLs based on the requested weather station
 function locationcheck ( code ) {
 
    stations = [ "RIW", "CYS",                // Wyoming
@@ -103,21 +136,12 @@ function locationcheck ( code ) {
                 "PAH", "LVX", "JKL"          // Kentucky
               ]; 
 
-
-   code = ( stations.indexOf ( code.toUpperCase() ) != -1 ) ? code.toLowerCase() : "lot"; // default station is Chicago
+   // Make sure the requested site is in the list of possible weather stations
+   // default station is Chicago
+   code = ( stations.indexOf ( code.toUpperCase() ) != -1 ) ? code.toLowerCase() : "lot";
    radar_code = radar_stations[ stations.indexOf (code.toUpperCase()) ];
 
-   url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/";
-   wximg_url = url + "File.png";
-   wxdesc_url = url + "description.txt";
-   nowcast_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/short/description.txt";
-   nowcastimg_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/short/File.png";
-
-   link_url = "http://www.crh.noaa.gov/wxstory.php?site=" + code;
-   radar_url = "http://radar.weather.gov/ridge/radar_lite.php?rid=" + code + "&product=N0R&loop=yes";
-   nowcast_link_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/nowcast_link";
-   radarimg_url = "http://radar.weather.gov/ridge/lite/N0R/" + radar_code + "_loop.gif"; 
-
+   // Set the region for the regional radar
    value = stations.indexOf ( code.toUpperCase() );
    switch (true) {
 
@@ -133,109 +157,172 @@ function locationcheck ( code ) {
 
    }
 
+   // Set the URLs
+   url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/";
+   wximg_url = url + "File.png";
+   wxdesc_url = url + "description.txt";
+   nowcast_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/short/description.txt";
+   nowcastimg_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/short/File.png";
+   nowcast_link_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/nowcast_link";
+   radarimg_url = "http://radar.weather.gov/ridge/lite/N0R/" + radar_code + "_loop.gif"; 
    regional_url = "http://radar.weather.gov/ridge/Conus/Loop/" + region + "_loop.gif";
+
+   // These NWS page URLs aren't used in this app anymore
+   // link_url = "http://www.crh.noaa.gov/wxstory.php?site=" + code;
+   // radar_url = "http://radar.weather.gov/ridge/radar_lite.php?rid=" + code + "&product=N0R&loop=yes";
 
 }
 
+// The following code all executes linearly
+
+// Verify the location requested
 locationcheck( gup('site') );
 
+// Set the width of the browser. 
+// This has the effect of enlarging the text in the iframes
+// (which can't be styled to the same origin policy)
+// If changing this, also change the META VIEWPORT tag
 width = 280;
 
 
-// NOWCAST LOGIC
+// NOWCAST LOGIC ----------------------------------------------
+
+// The default is for no nowcast banner
+nowcast_available = false;
+
+// Put the image URLs into an array
 nowcast_images = [wximg_url, nowcastimg_url];
+
+// Calculates the necessary margin when toggling images so they don't move around
+function set_nowcast_vspace (first, second) {
+
+      adjustment = (nowcast_available) ? 10 : 0;	// 10px adjustment for the banner
+      first += adjustment;
+
+	nowcast_vspace = (first > second) ? [0, first - second] : [second - first, 0];
+}
+
 
 // Preload the Weather Story image and Nowcast image
 wx_img = new Image();
 nowcast_img = new Image();
 
-// Default image heights
-wx_img_height = ( width / 652 ) * 540;
-nowcast_img_height = ( width / 783 ) * 558;
+// Calculate the default image heights, then calculate the margin
+wx_img_height = Math.round(( width / 652 ) * 540);
+nowcast_img_height = Math.round(( width / 783 ) * 558);
 nowcast_heights = [wx_img_height, nowcast_img_height];
-nowcast_vspace = [nowcast_img_height - wx_img_height, 0];
+set_nowcast_vspace(wx_img_height, nowcast_img_height);
 
 // Set the image heights to the proper ratio as each image loads
 wx_img.onload = function () {
-    wx_img_height = ( width / this.width ) * this.height;
+    wx_img_height = Math.round(( width / this.width ) * this.height);
     nowcast_heights = [wx_img_height, nowcast_img_height];
-	nowcast_vspace = [nowcast_img_height - wx_img_height, 0];
+	set_nowcast_vspace(wx_img_height, nowcast_img_height);
 	wx_img = wx_img.onload = wx_img.onabort = wx_img.onerror = null;
 	document.getElementById("wximg").height = wx_img_height;
     };
 nowcast_img.onload = function () {
-    nowcast_img_height = ( width / this.width ) * this.height;
+    nowcast_img_height = Math.round(( width / this.width ) * this.height);
     nowcast_heights = [wx_img_height, nowcast_img_height];
-	nowcast_vspace = [nowcast_img_height - wx_img_height, 0];
+	set_nowcast_vspace(wx_img_height, nowcast_img_height);
 	nowcast_img = nowcast_img.onload = nowcast_img.onabort = nowcast_img.onerror = null;
     };
 
+// Load the images, triggering the onLoad function
 wx_img.src = wximg_url;
 nowcast_img.src = nowcastimg_url;
 
 
+// The toggle status starts off (this status variable is also used an index for the arrays
 nowcast_toggled = 0;
 
-
+// Swap the images and turn the nowcast banner on and off
 function toggle_nowcast () {
   wximg = document.getElementById("wximg");
-  nowcast_toggled = (nowcast_toggled + 1) % 2;
+  nowcast_toggled = (nowcast_toggled + 1) % 2; // only 0 or 1 are possible
   
   wximg.src = nowcast_images[nowcast_toggled];
   wximg.height = nowcast_heights[nowcast_toggled];
-  wximg.style.marginTop = Math.round(nowcast_vspace[nowcast_toggled]) + 'px';
+  wximg.style.paddingTop = nowcast_vspace[nowcast_toggled] + 'px';
 
-  // if (nowcast_toggled == 0) {
-  //	document.getElementById("nowcast").style.display = "none";
-  //	}
-  //  else {
-  //	document.getElementById("nowcast").style.display = "block";
-  // }
+  if (nowcast_available) {
+  	document.getElementById("nowcast_banner").style.display = (nowcast_toggled == 1) ?
+		"none" : "block";
+   }
 	
 }
 
+// Sets up the nowcast banner if a nowcast is available
 function activate_nowcast() {
+      nowcast_available = true;
+	set_nowcast_vspace(wx_img_height, nowcast_img_height);
 	document.getElementById("nowcast").style.display = "block";
+      if (nowcast_toggled == 0) { document.getElementById("nowcast_banner").style.display = "block"; }
+	document.getElementById("wximg").style.paddingTop = nowcast_vspace[nowcast_toggled] + 'px';
+	document.getElementById("wximg").style.background = "#aa0000"; 
+
 }
 
-// RADAR LOGIC
+
+// RADAR LOGIC ----------------------------------------------
+
+// Put the image URLs into an array
 radar_images = [radarimg_url, regional_url];
+
+// Calculates the necessary margin when toggling images so they don't move around
+function set_radar_vspace (first, second) {
+    first += 10;	// adjust for the banner on the local radar
+
+	radar_vspace = (first > second) ? [0, first - second] : [second - first, 0];
+}
 
 // Preload the Local and Regional radar images
 localradar_img = new Image();
 regionalradar_img = new Image();
 
 // Default image heights
-localradar_img_height = ( width / 600 ) * 550;
-regionalradar_img_height = ( width / 600 ) * 571;
+localradar_img_height = Math.round(( width / 600 ) * 550);
+regionalradar_img_height = Math.round(( width / 600 ) * 571);
 radar_heights = [localradar_img_height, regionalradar_img_height];
-
+set_radar_vspace(localradar_img_height, regionalradar_img_height);
 
 // Set the image heights to the proper ratio as each image loads
 localradar_img.onload = function () {
-    localradar_img_height = ( width / this.width ) * this.height;
+    localradar_img_height = Math.round(( width / this.width ) * this.height);
     radar_heights = [localradar_img_height, regionalradar_img_height];
+	set_radar_vspace(localradar_img_height, regionalradar_img_height);
 	localradar_img = localradar_img.onload = localradar_img.onabort = localradar_img.onerror = null;
 	document.getElementById("radarimg").height = localradar_img_height;
     };
 regionalradar_img.onload = function () {
-    regionalradar_img_height = ( width / this.width ) * this.height;
+    regionalradar_img_height = Math.round(( width / this.width ) * this.height);
     radar_heights = [localradar_img_height, regionalradar_img_height];
+	set_radar_vspace(localradar_img_height, regionalradar_img_height);
 	regionalradar_img = regionalradar_img.onload = regionalradar_img.onabort = regionalradar_img.onerror = null;
     };
 
+// Load the images
 localradar_img.src = radarimg_url;
 regionalradar_img.src = regional_url;
 
 
-
+// The toggle status starts off (this status variable is also used an index for the arrays
 radar_toggled = 0;
 
+// Swap the local and regional radar images
 function toggle_radar () {
 
+  radarimg = document.getElementById("radarimg");
+
   radar_toggled = (radar_toggled + 1) % 2;
-  document.getElementById("radarimg").src = radar_images[radar_toggled];
-  document.getElementById("radarimg").height = radar_heights[radar_toggled];
+  radarimg.src = radar_images[radar_toggled];
+  radarimg.height = radar_heights[radar_toggled];
+  radarimg.style.paddingBottom = radar_vspace[radar_toggled] + 'px';
+  radarimg.style.background = "#0000aa";
+
+  document.getElementById("radar_banner").style.display = (radar_toggled == 1) ?
+		"none" : "block";
+
   
 }
 
@@ -246,6 +333,7 @@ function toggle_radar () {
 </head>
 
     <body>
+<div id="nowcast_banner"><div id="nowcast_inner" class="inner_banner">Tap for Nowcast</div></div>
 <div id="content">
 <script type="text/javascript">
 
@@ -256,11 +344,23 @@ document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" s
 document.writeln('<br />');
 document.writeln('<a href="javascript:toggle_radar();"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="' + width + '" height="' + localradar_img_height + '"></a>');
 
+
+// THIS PART IS SNEAKY:
+// First, start listening for errors,
+// Then load a file from the NWS site that points to the Nowcast page if one is available.
+// (The file is blank if there is no Nowcast, but otherwise contains some text.)
+// By loading the file as a script, it will throw an error if there is a Nowcast.
+// The "error handler" sets the nowcast_available flag and turns on the banner
+// and also displays the Nowcast text. The Nowcast text does not toggle with the the images
+// but instead is always visible.
+
+// Turn on error listening
 window.onerror = function(message, url, lineNumber) {
   activate_nowcast(); 
   return true; // prevents browser error messages
 };
 
+// Load the Nowcast pointer file as a scropt
 nowcastScript = document.createElement("script");
 nowcastScript.src = nowcast_link_url;
 document.getElementById("content").appendChild(nowcastScript);
@@ -268,5 +368,6 @@ document.getElementById("content").appendChild(nowcastScript);
 </script>
 
 </div>
+<div id="radar_banner"><div id="radar_inner" class="inner_banner">Tap for Regional Radar</div></div>
     </body>
 </html>
