@@ -11,6 +11,6 @@ To use this project, place the two files on your own webserver, and then load th
 
 Other NWS Regions may offer something similar, but the HTML file would need to be edited to pull the proper source images and text forecast from those sites. I made this one for myself and just wanted to set it free.
 
-# [See it in action!](http://stopgap-mefi.github.com/weather-story/?site=lot)
+# [See it in action! (Load this link on your iPhone)](http://stopgap-mefi.github.com/weather-story/?site=lot)
 
 You should load it on an iPhone with a Retina display to get the full effect.
