@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Wx Story</title>
 
-    <meta name="viewport" content="width=280,initial-scale=1.142857,user-scalable=yes,minimum-scale=1.142857,maximum-scale=6" />
+    <meta name="viewport" content="width=300,initial-scale=1.0666666,user-scalable=yes,minimum-scale=1.06666,maximum-scale=6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 	<meta name="format-detection" content="telephone=no">
@@ -41,6 +41,7 @@ iframe {
   overflow: hidden;
   text-align: center;
   background: white;
+  display: none;
   }
 
 #nowcast {
@@ -182,7 +183,7 @@ locationcheck( gup('site') );
 // This has the effect of enlarging the text in the iframes
 // (which can't be styled to the same origin policy)
 // If changing this, also change the META VIEWPORT tag
-width = 280;
+width = 300;
 
 
 // NOWCAST LOGIC ----------------------------------------------
@@ -208,8 +209,8 @@ wx_img = new Image();
 nowcast_img = new Image();
 
 // Calculate the default image heights, then calculate the margin
-wx_img_height = Math.round(( width / 652 ) * 540);
-nowcast_img_height = Math.round(( width / 783 ) * 558);
+wx_img_height = Math.round(( width / 652 ) * 510);         // estimate
+nowcast_img_height = Math.round(( width / 783 ) * 558);    // estimate
 nowcast_heights = [wx_img_height, nowcast_img_height];
 set_nowcast_vspace(wx_img_height, nowcast_img_height);
 
@@ -337,7 +338,7 @@ function toggle_radar () {
 <div id="content">
 <script type="text/javascript">
 
-document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="' + width + '" height="' + wx_img_height + '"></a>');
+document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="' + width + '" onLoad="javascript:document.getElementById(\'content\').style.display = \'block\';"></a>');
 document.writeln('<br />');
 document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
 document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
