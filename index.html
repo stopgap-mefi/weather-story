@@ -36,12 +36,15 @@ iframe {
   margin: 0px auto 0px -4px;
   }
 
+#container {
+  display: none;
+  }
+  
 #content {
   width: 100%;
   overflow: hidden;
   text-align: center;
   background: white;
-  display: none;
   }
 
 #nowcast {
@@ -333,12 +336,12 @@ function toggle_radar () {
 
 </head>
 
-    <body>
+    <body><div id="container">
 <div id="nowcast_banner"><div id="nowcast_inner" class="inner_banner">Tap for Nowcast</div></div>
 <div id="content">
 <script type="text/javascript">
 
-document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="' + width + '" onLoad="javascript:document.getElementById(\'content\').style.display = \'block\';"></a>');
+document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Graphical depiction of the weather story for today." src="' + wximg_url + '" width="' + width + '" onLoad="javascript:document.getElementById(\'container\').style.display = \'block\';"></a>');
 document.writeln('<br />');
 document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
 document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
@@ -370,5 +373,7 @@ document.getElementById("content").appendChild(nowcastScript);
 
 </div>
 <div id="radar_banner"><div id="radar_inner" class="inner_banner">Tap for Regional Radar</div></div>
+
+</div>
     </body>
 </html>
