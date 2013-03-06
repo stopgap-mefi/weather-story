@@ -218,14 +218,14 @@ wx_img.onload = function () {
     wx_img_height = Math.round(( width / this.width ) * this.height);
     nowcast_heights = [wx_img_height, nowcast_img_height];
 	set_nowcast_vspace(wx_img_height, nowcast_img_height);
-	wx_img = wx_img.onload = wx_img.onabort = wx_img.onerror = null;
+	// wx_img = wx_img.onload = wx_img.onabort = wx_img.onerror = null; // clear from memory
 	document.getElementById("wximg").height = wx_img_height;
     };
 nowcast_img.onload = function () {
     nowcast_img_height = Math.round(( width / this.width ) * this.height);
     nowcast_heights = [wx_img_height, nowcast_img_height];
 	set_nowcast_vspace(wx_img_height, nowcast_img_height);
-	nowcast_img = nowcast_img.onload = nowcast_img.onabort = nowcast_img.onerror = null;
+	// nowcast_img = nowcast_img.onload = nowcast_img.onabort = nowcast_img.onerror = null; // clear from memory
     };
 
 // Load the images, triggering the onLoad function
