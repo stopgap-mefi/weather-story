@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <title>Wx Story</title>
 
-    <meta name="viewport" content="width=300,initial-scale=1.0666666,user-scalable=yes,minimum-scale=1.06666,maximum-scale=6" />
+    <meta name="viewport" content="width=300,initial-scale=1.06666,user-scalable=yes,minimum-scale=1.06666,maximum-scale=6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 	<meta name="format-detection" content="telephone=no">
 
     <!-- iPhone (Retina) -->
@@ -23,7 +23,13 @@
 body {
   margin: 0px;
   padding: 0px;
+  padding-top: 20px;
+  text-align: center;
   }
+
+img {
+  display: block;
+  }  
 
 a img { 
   border: 0;
@@ -58,10 +64,10 @@ iframe {
 
 .inner_banner {
   color: white;
-  font-family: helvetica, arial, sans-serif;
-  font-weight: bold;
-  font-size: 7px;
-  height: 10px;
+  font-family: helvetica-light, arial, sans-serif;
+  font-weight: normal;
+  font-size: 9px;
+  height: 14px;
   width: 100%;
   overflow: hidden;
   text-align: center;
@@ -83,6 +89,45 @@ pre {
   font-family: helvetica, arial, sans-serif;
   }
   
+#statusbar {
+  background: #0c151b;
+  opacity: 0.6666;
+  position: fixed;
+  width: 100%;
+  height: 20px;
+  z-index: 100;
+  top: 0px;
+  left: 0px;
+  }
+
+#longtermtempimg,
+#longtermprecipimg {
+  display: none;
+  }
+
+#longterm_banner {
+  background: white;
+  }
+
+#longterm_inner {
+  background: #fff;
+  border-top: 0.6px solid #ccc;
+  border-bottom: 0.6px solid #ccc;
+  height: 30px;
+  padding-top: 0px;
+  }
+
+#longterm_inner a {
+  color: #00a;
+  font-size: 15px;
+  font-weight: normal;
+  padding: 5px 0px 10px 4px;
+  text-decoration: none;
+  width: 100%;
+  display: block;
+  text-align: left;
+  }
+
 </style>
 
 
@@ -166,6 +211,10 @@ function locationcheck ( code ) {
    nowcast_link_url = "http://www.crh.noaa.gov/images/fxc/" + code + "/wx/nowcast_link";
    radarimg_url = "http://radar.weather.gov/ridge/lite/N0R/" + radar_code + "_loop.gif"; 
    regional_url = "http://radar.weather.gov/ridge/Conus/Loop/" + region + "_loop.gif";
+   f610temp_url = "http://www.cpc.ncep.noaa.gov/products/predictions/610day/610temp.new.gif";
+   f610precip_url = "http://www.cpc.ncep.noaa.gov/products/predictions/610day/610prcp.new.gif";
+   f814temp_url = "http://www.cpc.ncep.noaa.gov/products/predictions/814day/814temp.new.gif";
+   f814precip_url = "http://www.cpc.ncep.noaa.gov/products/predictions/814day/814prcp.new.gif";
 
    // These NWS page URLs aren't used in this app anymore
    // link_url = "http://www.crh.noaa.gov/wxstory.php?site=" + code;
@@ -196,7 +245,7 @@ nowcast_images = [wximg_url, nowcastimg_url];
 // Calculates the necessary margin when toggling images so they don't move around
 function set_nowcast_vspace (first, second) {
 
-      adjustment = (nowcast_available) ? 10 : 0;	// 10px adjustment for the banner
+      adjustment = (nowcast_available) ? 14 : 0;	// 14px adjustment for the banner
       first += adjustment;
 
 	nowcast_vspace = (first > second) ? [0, first - second] : [second - first, 0];
@@ -271,7 +320,7 @@ radar_images = [radarimg_url, regional_url];
 
 // Calculates the necessary margin when toggling images so they don't move around
 function set_radar_vspace (first, second) {
-    first += 10;	// adjust for the banner on the local radar
+    first += 14;	// adjust for the banner on the local radar
 
 	radar_vspace = (first > second) ? [0, first - second] : [second - first, 0];
 }
@@ -322,8 +371,53 @@ function toggle_radar () {
 
   document.getElementById("radar_banner").style.display = (radar_toggled == 1) ?
 		"none" : "block";
+}
 
-  
+
+// LONG-TERM OUTLOOK LOGIC ----------------------------------------------
+
+// Put the image URLs into an array
+longtermtemp_images = [f610temp_url, f814temp_url];
+longtermprecip_images = [f610precip_url, f814precip_url];
+
+// Preload the Long-term forecast images
+f610temp_img = new Image();
+f610precip_img = new Image();
+f814temp_img = new Image();
+f814precip_img = new Image();
+
+// Load the images
+f610temp_img.src = f610temp_url;
+f610precip_img.src = f610precip_url;
+f814temp_img.src = f814temp_url;
+f814precip_img.src = f814precip_url;
+
+
+// The toggle status starts off (this status variable is also used an index for the arrays
+longterm_toggled = 0;
+
+// Swap the long-term outlook images
+function toggle_longterm () {
+
+  tempimg = document.getElementById("longtermtempimg");
+  precipimg = document.getElementById("longtermprecipimg");
+
+  longterm_toggled = (longterm_toggled + 1) % 3;
+
+  if (longterm_toggled == 0) {
+    document.getElementById("longterm_banner").style.display = "block";
+    document.getElementById("longtermtempimg").style.display = "none";
+    document.getElementById("longtermprecipimg").style.display = "none";
+  } 
+  else {
+    document.getElementById("longterm_banner").style.display = "none";
+    document.getElementById("longtermtempimg").style.display = "block";
+    document.getElementById("longtermprecipimg").style.display = "block";
+
+    tempimg.src = longtermtemp_images[longterm_toggled - 1];
+    precipimg.src = longtermprecip_images[longterm_toggled - 1];
+
+  }
 }
 
 
@@ -333,6 +427,7 @@ function toggle_radar () {
 </head>
 
     <body><div id="container">
+<div id="statusbar"></div>
 <div id="nowcast_banner"><div id="nowcast_inner" class="inner_banner">Tap for Nowcast</div></div>
 <div id="content">
 <script type="text/javascript">
@@ -341,8 +436,12 @@ document.writeln('<a href="javascript:toggle_nowcast();"><img id="wximg" alt="Gr
 document.writeln('<br />');
 document.writeln('<iframe id="nowcast" src="' + nowcast_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
 document.writeln('<iframe id="wxdesc" src="' + wxdesc_url + '" frameborder="0" scrolling="no" width="' + ( width + 10 ) + '" seamless></iframe>');
+document.writeln('<div id="longterm_banner"><div id="longterm_inner" class="inner_banner"><a href="javascript:toggle_longterm();">View Long-term Outlooks &#12297;</a></div></div>');
+document.writeln('<a href="javascript:toggle_longterm();"><img id="longtermtempimg" alt="Long-term temperature outlook." src="' + f610temp_url + '" width="' + width + '" /></a>');
+document.writeln('<a href="javascript:toggle_longterm();"><img id="longtermprecipimg" alt="Long-term precipitation outlook." src="' + f610precip_url + '" width="' + width + '" /></a>');
 document.writeln('<br />');
-document.writeln('<a href="javascript:toggle_radar();"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="' + width + '" height="' + localradar_img_height + '"></a>');
+document.writeln('<br />');
+document.writeln('<a href="javascript:toggle_radar();"><img id="radarimg" alt="Current local animated radar." src="' + radarimg_url + '" width="' + width + '" height="' + localradar_img_height + ' /"></a>');
 
 
 // THIS PART IS SNEAKY:
@@ -368,6 +467,7 @@ document.getElementById("content").appendChild(nowcastScript);
 </script>
 
 </div>
+
 <div id="radar_banner"><div id="radar_inner" class="inner_banner">Tap for Regional Radar</div></div>
 
 </div>
